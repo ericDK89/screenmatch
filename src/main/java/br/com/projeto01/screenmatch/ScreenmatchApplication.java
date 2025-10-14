@@ -28,6 +28,7 @@ public class ScreenmatchApplication implements CommandLineRunner {
     var address = "https://www.omdbapi.com/?t=breaking+bad&type=series&apikey=" + apiKey;
     var response = apiService.get(address);
     var result = convertData.fromJson(response.body(), Serie.class);
+    System.out.println("result");
     System.out.println(result);
   }
 }
