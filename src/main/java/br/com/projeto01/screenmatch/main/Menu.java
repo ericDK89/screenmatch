@@ -1,115 +1,107 @@
 package br.com.projeto01.screenmatch.main;
 
-import br.com.projeto01.screenmatch.model.Episode;
 import br.com.projeto01.screenmatch.model.Season;
+import br.com.projeto01.screenmatch.model.Serie;
 import br.com.projeto01.screenmatch.services.ApiService;
-import br.com.projeto01.screenmatch.services.File;
 import br.com.projeto01.screenmatch.services.GsonConvertData;
+import br.com.projeto01.screenmatch.utils.FormatInput;
 import java.io.IOException;
-import java.net.http.HttpResponse;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
+import javax.imageio.IIOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Menu {
-  private final Scanner scanner = new Scanner(System.in);
 
-  @Autowired GsonConvertData convertData;
+  private final Scanner sc = new Scanner(System.in);
+  private final String URI = "https://www.omdbapi.com/?t=";
 
-  @Autowired ApiService apiService;
+  @Autowired
+  GsonConvertData convertData;
 
-  @Autowired File file;
+  @Autowired
+  ApiService apiService;
+
+  @Autowired
+  FormatInput formatInput;
 
   @Value("${apikey}")
   private String apiKey;
 
-  public void execute() {
-    //    var episodeURI =
-    //        "https://www.omdbapi.com/?t=breaking+bad&season=1&episode=2&type=series&apikey=" +
-    // apiKey;
+  public void execute() throws IOException {
 
-    try {
-      //      System.out.println("Type serie's name: ");
-      //      var serieName = scanner.nextLine().trim().replace(" ", "+");
-      String URL = "https://www.omdbapi.com/";
+    String menu = """
+        1 - search series
+        2 - search episode
+        
+        0 - exit
+        """;
 
-      List<Season> seasons = new ArrayList<>();
+    System.out.println(menu);
+    int option = -1;
 
-      Season season;
-      var seasonCount = 1;
-      HttpResponse<String> response;
+    while (true) {
+      try {
+        option = sc.nextInt();
+        sc.nextLine();
 
-      while (true) {
-        var seasonURI =
-            URL + "?t=" + "euphoria" + "&season=" + seasonCount + "&type=series&apikey=" + apiKey;
-        response = apiService.get(seasonURI);
-
-        season = convertData.fromJson(response.body(), Season.class);
-
-        if (!season.response()) break;
-
-        seasons.add(season);
-        seasonCount++;
-      }
-
-      var jsonSeasons = convertData.toJson(seasons);
-      file.write("seasons.json", jsonSeasons);
-
-      List<Episode> episodes =
-          seasons.stream()
-              .flatMap(
-                  s ->
-                      s.episodeDTOS().stream()
-                          .map(
-                              dto -> {
-                                Episode episode = new Episode();
-                                episode.setTitle(dto.title());
-                                episode.setSeason(s.season());
-                                episode.setNumber(dto.episode());
-                                episode.setRating(dto.rating());
-                                episode.setReleasedAt(dto.releasedAt());
-                                return episode;
-                              }))
-              .toList();
-
-      List<Episode> topFive =
-          episodes.stream()
-              .sorted(Comparator.comparingDouble(Episode::getRating).reversed())
-              .limit(5)
-              .toList();
-
-      int year;
-
-      while (true) {
-        try {
-          System.out.println("Year: ");
-          year = scanner.nextInt();
-          break;
-        } catch (InputMismatchException e) {
-          System.err.println(e.getMessage());
+        if (option != 1 && option != 2 & option != 0) {
+          System.out.println("Insert a valid option");
+          System.out.println(menu);
+          sc.nextLine();
         }
+
+        break;
+      } catch (InputMismatchException e) {
+        System.err.println("Invalid input");
+        sc.nextLine();
       }
+    }
 
-      scanner.nextLine();
+    switch (option) {
+      case 1:
+        showSeries();
+        break;
+      case 2:
+        getEpisodesPerSeries();
+        break;
+      case 0:
+        System.out.println("Exit");
+    }
+  }
 
-      LocalDate selectedYear = LocalDate.of(year, 1, 1);
+  private void showSeries() throws IOException {
+    Serie serie = getSeriesData();
+    System.out.println(serie);
+  }
 
-      List<Episode> episodesFromYear =
-          episodes.stream()
-              .filter(e -> e.getReleasedAt() != null && e.getReleasedAt().isAfter(selectedYear))
-              .toList();
-
-      episodesFromYear.forEach(System.out::println);
-
-    } catch (InputMismatchException | IOException e) {
+  private Serie getSeriesData() throws IIOException {
+    try {
+      System.out.println("Type the series name for search");
+      String series = sc.nextLine();
+      var response = apiService.get(URI + formatInput.execute(series) + "&apikey=" + apiKey);
+      return convertData.fromJson(response.body(), Serie.class);
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void getEpisodesPerSeries() throws IOException {
+    Serie series = getSeriesData();
+    List<Season> seasons = new ArrayList<>();
+
+    for (int i = 1; i <= series.totalSeason(); i++) {
+      var response = apiService.get(
+          URI + formatInput.execute(series.title()) + "&season=" + i + "&apikey=" + apiKey);
+      Season season = convertData.fromJson(response.body(), Season.class);
+      seasons.add(season);
+    }
+
+    seasons.forEach(System.out::println);
   }
 }
