@@ -1,5 +1,6 @@
 package br.com.projeto01.screenmatch.services;
 
+import br.com.projeto01.screenmatch.services.interfaces.IApiService;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -31,5 +32,12 @@ public class ApiService implements IApiService {
     } catch (InterruptedException e) {
       throw new RemoteException(e.getMessage());
     }
+  }
+
+  public interface IConvertData {
+
+    <T> T fromJson(String json, Class<T> clazz);
+
+    String toJson(Object data);
   }
 }

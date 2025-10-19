@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GsonConvertData implements IConvertData {
+public class GsonConvertData implements ApiService.IConvertData {
 
   public <T> T fromJson(String json, Class<T> clazz) {
     try {

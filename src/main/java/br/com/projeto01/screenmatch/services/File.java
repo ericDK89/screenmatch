@@ -1,5 +1,6 @@
 package br.com.projeto01.screenmatch.services;
 
+import br.com.projeto01.screenmatch.services.interfaces.IFile;
 import java.io.FileWriter;
 import java.io.IOException;
 import org.springframework.stereotype.Service;
