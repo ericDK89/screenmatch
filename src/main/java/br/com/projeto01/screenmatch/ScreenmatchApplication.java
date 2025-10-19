@@ -9,11 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ScreenmatchApplication implements CommandLineRunner {
 
-  @Autowired private Menu menu;
+  @Autowired
+  private Menu menu;
 
   public static void main(String[] args) {
     SpringApplication.run(ScreenmatchApplication.class, args);
   }
+
 
   @Override
   public void run(String... args) throws Exception {

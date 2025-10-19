@@ -3,11 +3,13 @@ package br.com.projeto01.screenmatch.main;
 import br.com.projeto01.screenmatch.dto.SeasonDTO;
 import br.com.projeto01.screenmatch.dto.SeriesDTO;
 import br.com.projeto01.screenmatch.model.Series;
+import br.com.projeto01.screenmatch.repositories.SeriesRepository;
 import br.com.projeto01.screenmatch.services.ApiService;
 import br.com.projeto01.screenmatch.services.GsonConvertData;
 import br.com.projeto01.screenmatch.utils.FormatInput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +21,18 @@ public class Menu {
 
   private final Scanner sc = new Scanner(System.in);
   private final String URI = "https://www.omdbapi.com/?t=";
-  private final List<Series> seriesList = new ArrayList<>();
   @Autowired
   GsonConvertData convertData;
   @Autowired
   ApiService apiService;
   @Autowired
   FormatInput formatInput;
+  @Autowired
+  SeriesRepository seriesRepository;
   @Value("${apikey}")
   private String apiKey;
 
-  public void execute() throws IOException {
+  public void execute() throws IOException, InterruptedException {
 
     int option = -1;
 
@@ -66,12 +69,11 @@ public class Menu {
     }
   }
 
-  private void showSeries() throws IOException {
+  private void showSeries() throws IOException, InterruptedException {
     SeriesDTO seriesDTO = getSeriesData();
 
     Series series = new Series(seriesDTO);
-    seriesList.add(series);
-
+    seriesRepository.save(series);
     System.out.println(series);
   }
 
@@ -101,7 +103,7 @@ public class Menu {
   }
 
   private void showListedSeries() {
-    seriesList.forEach(System.out::println);
-    System.out.println();
+    List<Series> series = seriesRepository.findAll();
+    series.stream().sorted(Comparator.comparing(Series::getTitle)).forEach(System.out::println);
   }
 }

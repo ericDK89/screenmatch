@@ -1,0 +1,19 @@
+services:
+
+  screenmatch_db:
+    container_name: screenmatch
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: screenmatch_db
+
+    volumes:
+      - postgres_data:/screenmatch
+
+volumes:
+  postgres_data:
+

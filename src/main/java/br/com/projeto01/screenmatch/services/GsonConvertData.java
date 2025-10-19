@@ -1,12 +1,13 @@
 package br.com.projeto01.screenmatch.services;
 
+import br.com.projeto01.screenmatch.services.interfaces.IConverData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class GsonConvertData implements ApiService.IConvertData {
+public class GsonConvertData implements IConverData {
 
   public <T> T fromJson(String json, Class<T> clazz) {
     try {

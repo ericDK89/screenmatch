@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.rmi.RemoteException;
 import java.time.Duration;
@@ -34,10 +35,19 @@ public class ApiService implements IApiService {
     }
   }
 
-  public interface IConvertData {
+  public HttpResponse<String> post(String url, String body)
+      throws IOException, InterruptedException {
+    try {
+      HttpClient client = HttpClient.newHttpClient();
+      HttpRequest request = HttpRequest.newBuilder()
+          .uri(URI.create(url))
+          .POST(BodyPublishers.ofString(body))
+          .header("Content-Type", "application/json")
+          .build();
 
-    <T> T fromJson(String json, Class<T> clazz);
-
-    String toJson(Object data);
+      return client.send(request, HttpResponse.BodyHandlers.ofString());
+    } catch (IOException | InterruptedException e) {
+      throw new RuntimeException(e.getMessage());
+    }
   }
 }
