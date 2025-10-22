@@ -27,15 +27,15 @@ public class Menu {
   private final Scanner sc = new Scanner(System.in);
   private final String URI = "https://www.omdbapi.com/?t=";
   @Autowired
-  GsonConvertData convertData;
+  private GsonConvertData convertData;
   @Autowired
-  ApiService apiService;
+  private ApiService apiService;
   @Autowired
-  FormatInput formatInput;
+  private FormatInput formatInput;
   @Autowired
-  SeriesRepository seriesRepository;
+  private SeriesRepository seriesRepository;
   @Autowired
-  EpisodeRepository episodeRepository;
+  private EpisodeRepository episodeRepository;
   @Value("${apikey}")
   private String apiKey;
 
