@@ -52,6 +52,8 @@ public class Menu {
           3 - show all listed series
           4 - search series by title
           5 - search series by actor
+          6 - search top 5 series
+          7 - search series for category
           
           0 - exit
           """;
@@ -77,6 +79,10 @@ public class Menu {
           case 5:
             searchSeriesByActorName();
             break;
+          case 6:
+            getTop5Series();
+          case 7:
+            searchSeriesByGender();
           case 0:
             System.out.println("Exit");
             break;
@@ -91,6 +97,24 @@ public class Menu {
         option = -1;
       }
     }
+  }
+
+  private void searchSeriesByGender() {
+    String useInput = sc.nextLine();
+    List<Series> seriesList = seriesRepository.findByGenres(useInput);
+    if (seriesList.isEmpty()) {
+      throw new SeriesNotFound();
+    }
+    seriesList.forEach(System.out::println);
+  }
+
+  private void getTop5Series() {
+    List<Series> seriesList = seriesRepository.findTop5ByOrderByRatingDesc();
+    if (seriesList.isEmpty()) {
+      throw new SeriesNotFound();
+    }
+
+    seriesList.forEach(s -> System.out.println(s.getTitle() + ":" + " " + s.getRating()));
   }
 
   private void searchSeriesByActorName() {

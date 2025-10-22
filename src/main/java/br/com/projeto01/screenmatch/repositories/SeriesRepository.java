@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface SeriesRepository extends JpaRepository<Series, UUID> {
 
-  @Query("SELECT DISTINCT s FROM Series s LEFT JOIN FETCH s.episodes")
+  @Query("SELECT s FROM Series s LEFT JOIN FETCH s.episodes")
   List<Series> findAllWithEpisodes();
 
   @Query("SELECT s FROM Series s " +
@@ -19,8 +19,19 @@ public interface SeriesRepository extends JpaRepository<Series, UUID> {
       "ORDER BY s.title, e.number")
   Optional<Series> findByTitleContainingIgnoreCase(String title);
 
-  @Query("select s from Series s " +
+  @Query("SELECT s from Series s " +
       "LEFT JOIN FETCH s.episodes e " +
-      "where array_contains(s.actors, :name)")
+      "WHERE array_contains(s.actors, :name)")
   List<Series> findByActorsContainingIgnoreCase(@Param("name") String name);
+
+  @Query("SELECT s FROM Series s " +
+      "LEFT JOIN FETCH s.episodes e " +
+      "ORDER BY s.rating DESC " +
+      "LIMIT 5")
+  List<Series> findTop5ByOrderByRatingDesc();
+
+  @Query("SELECT s FROM Series s " +
+      "LEFT JOIN FETCH s.episodes e " +
+      "WHERE array_contains(s.genres, :genre)")
+  List<Series> findByGenres(@Param("genre") String genre);
 }
