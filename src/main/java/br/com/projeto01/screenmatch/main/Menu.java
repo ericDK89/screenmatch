@@ -50,6 +50,8 @@ public class Menu {
           1 - search series
           2 - search episode
           3 - show all listed series
+          4 - search series by title
+          5 - search series by actor
           
           0 - exit
           """;
@@ -69,6 +71,12 @@ public class Menu {
             break;
           case 3:
             showListedSeries();
+          case 4:
+            searchSeriesByTitle();
+            break;
+          case 5:
+            searchSeriesByActorName();
+            break;
           case 0:
             System.out.println("Exit");
             break;
@@ -83,6 +91,25 @@ public class Menu {
         option = -1;
       }
     }
+  }
+
+  private void searchSeriesByActorName() {
+    System.out.println("Type a actor name");
+    String userInput = sc.nextLine();
+    List<Series> seriesList = seriesRepository.findByActorsContainingIgnoreCase(userInput);
+
+    if (seriesList.isEmpty()) {
+      throw new SeriesNotFound();
+    }
+
+    seriesList.forEach(System.out::println);
+  }
+
+  private void searchSeriesByTitle() {
+    System.out.println("Search a series: ");
+    String useInput = sc.nextLine();
+    var series = seriesRepository.findByTitleContainingIgnoreCase(useInput).orElse(null);
+    System.out.println(series);
   }
 
   private void showSeries() throws IOException {
@@ -111,9 +138,12 @@ public class Menu {
     String seriesInput = sc.nextLine();
     List<SeasonDTO> seasonsDTOList = new ArrayList<>();
 
-    Series outputSeries = series.stream()
-        .filter(s -> s.getTitle().equalsIgnoreCase(seriesInput))
-        .findFirst().orElseThrow(SeriesNotFound::new);
+    Series outputSeries = seriesRepository.findByTitleContainingIgnoreCase(seriesInput)
+        .orElse(null);
+
+    if (outputSeries == null) {
+      throw new SeriesNotFound();
+    }
 
     for (int i = 1; i <= outputSeries.getTotalSeason(); i++) {
       var response = apiService.get(
@@ -129,7 +159,8 @@ public class Menu {
             .map(e -> new Episode(s.season(), e))).toList();
 
     outputSeries.setEpisodes(episodes);
-    seriesRepository.save(outputSeries);
+    var series = seriesRepository.save(outputSeries);
+    series.getEpisodes().forEach(System.out::println);
   }
 
   private void showListedSeries() {

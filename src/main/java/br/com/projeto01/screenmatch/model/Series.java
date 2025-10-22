@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.UUID;
@@ -58,6 +59,14 @@ public class Series {
     this.episodes = episodes;
   }
 
+  private List<Episode> getOrderedEpisodes() {
+    List<Episode> episodesOrderedBySeason = this.getEpisodes().stream()
+        .sorted(Comparator.comparingInt(Episode::getSeason)).toList();
+
+    return episodesOrderedBySeason.stream().sorted(Comparator.comparingInt(Episode::getNumber))
+        .toList();
+  }
+
   @Override
   public String toString() {
 
@@ -69,7 +78,7 @@ public class Series {
         getPlot(),
         getTotalSeason(),
         String.valueOf(getRating()),
-        getEpisodes()
+        getOrderedEpisodes()
     );
 
     return seriesDTO.toString();
