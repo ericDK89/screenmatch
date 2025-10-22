@@ -15,12 +15,6 @@ public interface SeriesRepository extends JpaRepository<Series, UUID> {
   @Query("SELECT s FROM Series s LEFT JOIN FETCH s.episodes")
   List<Series> findAllWithEpisodes();
 
-//  @Query("SELECT s FROM Series s " +
-//      "LEFT JOIN FETCH s.episodes e " +
-//      "WHERE UPPER(s.title) LIKE UPPER(%:title%) " +
-//      "ORDER BY s.title, e.number")
-//  Optional<Series> findByTitleContainingIgnoreCase(String title);
-
   @Query("SELECT s from Series s " +
       "LEFT JOIN FETCH s.episodes e " +
       "WHERE array_contains(s.actors, :name)")
@@ -36,4 +30,17 @@ public interface SeriesRepository extends JpaRepository<Series, UUID> {
       "LEFT JOIN FETCH s.episodes e " +
       "WHERE array_contains(s.genres, :genre)")
   List<Series> findByGenres(@Param("genre") String genre);
+
+  @Query("SELECT s FROM Series s " +
+      "LEFT JOIN FETCH s.episodes e " +
+      "WHERE e.releasedAt IS NOT NULL " +
+      "ORDER BY e.releasedAt DESC")
+  List<Series> findNewestSeries();
+
+  @Query("SELECT s FROM Series s " +
+      "LEFT JOIN FETCH s.episodes e " +
+      "WHERE e.releasedAt IS NOT NULL " +
+      "ORDER BY e.releasedAt ASC")
+  List<Series> findOldestSeries();
+
 }

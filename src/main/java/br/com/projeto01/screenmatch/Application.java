@@ -7,13 +7,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ScreenmatchApplication implements CommandLineRunner {
+public class Application implements CommandLineRunner {
 
   @Autowired
   private Menu menu;
 
   public static void main(String[] args) {
-    SpringApplication.run(ScreenmatchApplication.class, args);
+    SpringApplication.run(Application.class, args);
   }
 
 
