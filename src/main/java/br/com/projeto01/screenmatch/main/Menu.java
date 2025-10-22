@@ -54,6 +54,7 @@ public class Menu {
           5 - search series by actor
           6 - search top 5 series
           7 - search series for category
+          8 - search top 5 episodes from a series
           
           0 - exit
           """;
@@ -83,6 +84,8 @@ public class Menu {
             getTop5Series();
           case 7:
             searchSeriesByGender();
+          case 8:
+            searchTop5Episodes();
           case 0:
             System.out.println("Exit");
             break;
@@ -97,6 +100,16 @@ public class Menu {
         option = -1;
       }
     }
+  }
+
+  private void searchTop5Episodes() {
+    Series searchedSeries = searchSeriesByTitle();
+    List<Episode> episodes = episodeRepository.findTop5BySeriesIdOrderByRatingDesc(
+        searchedSeries.getId());
+    if (episodes.isEmpty()) {
+      throw new SeriesNotFound();
+    }
+    episodes.forEach(System.out::println);
   }
 
   private void searchSeriesByGender() {
@@ -129,11 +142,12 @@ public class Menu {
     seriesList.forEach(System.out::println);
   }
 
-  private void searchSeriesByTitle() {
+  private Series searchSeriesByTitle() {
     System.out.println("Search a series: ");
     String useInput = sc.nextLine();
     var series = seriesRepository.findByTitleContainingIgnoreCase(useInput).orElse(null);
     System.out.println(series);
+    return series;
   }
 
   private void showSeries() throws IOException {
@@ -156,7 +170,7 @@ public class Menu {
     }
   }
 
-  private void getEpisodesPerSeries() throws IOException {
+  private List<Episode> getEpisodesPerSeries() throws IOException {
     showListedSeries();
     System.out.println("Choose a series.");
     String seriesInput = sc.nextLine();
@@ -184,7 +198,7 @@ public class Menu {
 
     outputSeries.setEpisodes(episodes);
     var series = seriesRepository.save(outputSeries);
-    series.getEpisodes().forEach(System.out::println);
+    return episodes;
   }
 
   private void showListedSeries() {

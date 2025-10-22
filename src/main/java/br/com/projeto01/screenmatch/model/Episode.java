@@ -56,13 +56,20 @@ public class Episode {
     }
   }
 
+  public String getReleasedAt() {
+    if (this.releasedAt == null) {
+      return "";
+    }
+    return this.releasedAt.toString();
+  }
+
   @Override
   public String toString() {
     EpisodeDTO episodeDTO = new EpisodeDTO(
         getTitle(),
         getNumber(),
         String.valueOf(getRating()),
-        getReleasedAt().toString()
+        getReleasedAt()
     );
 
     return episodeDTO.toString();
